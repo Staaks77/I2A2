@@ -1,0 +1,538 @@
+{
+  "name": "I2A2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        120
+      ],
+      "id": "61ea9c53-687d-4b5c-b61c-99dff03e5926",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        120
+      ],
+      "id": "285a9902-96fb-462d-8826-2aeb5aa49beb",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        40,
+        20
+      ],
+      "id": "7b8dd245-9d89-4d55-b8b3-26c705e8005a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file_1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        40,
+        260
+      ],
+      "id": "e31824d8-3ad9-4e0e-92e3-cf9c2378bfbd",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Olá! 👋\nAqui você pode consultar rapidamente informações sobre notas fiscais. Pergunte, por exemplo:\n\nQuantas notas fiscais foram emitidas em determinado período? 📅\n\nQual o valor total das notas fiscais para um cliente específico? 💰\n\nEm quais estados as notas fiscais foram emitidas? 🗺️\n\nQuais produtos foram vendidos em uma cidade? 🏙️",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        540
+      ],
+      "id": "5ffa8c5e-b7ac-4bd3-a8aa-2fbdeea85d8b",
+      "name": "When chat message received",
+      "webhookId": "39cbdf57-bb8b-4196-94d0-13156bae0bcb",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an SQL agent and you are developing queries to execute on a PostgreSQL database.\nYou will receive a user question, and your answer must be exclusively the ready-to-run SQL query, with no additional text, explanation, or comments.\nDo not add titles, instructions, examples, or any words before or after the query.\nJust return the SQL query ready for use, nothing else.\n\nThe database consists of one table:\n\nTable notas_fiscais with the following columns:\n\nchave_de_acesso,modelo,serie,numero,natureza_da_operacao,data_emissao,evento_mais_recente,data_hora_evento_mais_recente,cpf_cnpj_emitente,razao_social_emitente,inscricao_estadual_emitente,uf_emitente,municipio_emitente,cnpj_destinatario,nome_destinatario,uf_destinatario,indicador_ie_destinatario,destino_da_operacao,consumidor_final,presenca_do_comprador,valor_nota_fiscal,descricao_do_produto,codigo_ncm_sh,ncm_sh_tipo_de_produto,cfop,quantidade,unidade,valor_unitario,valor_total\n\nImportant Table Rules\n\nEach row in this table represents a single item of a nota fiscal (invoice).\n\nA nota fiscal can have multiple items; all items belonging to the same nota fiscal share the same value in the \"chave_de_acesso\" column.\n\nEach nota fiscal (invoice) is uniquely identified by the value in the \"chave_de_acesso\" column.\n\nIf there are duplicate \"chave_de_acesso\" values, they refer to items of the same nota fiscal.\n\nWhen calculating totals or counts related to invoices (not items), always use DISTINCT \"chave_de_acesso\" to avoid duplicates.\n\nNote: The columns \"valor_total\" and \"valor_unitario\" represent monetary values.\n\nMandatory Criteria\n\nThe output must be ONLY the complete SQL query.\n\nDo not add any comments, explanations, markdown, or extra formatting.\n\nUse COUNT(), SUM(), or AVG() when applicable.\n\nAlways use double quotes for column names (e.g., \"uf_emitente\") and single quotes for literal values (e.g., 'SP').\n\nTable names must not be quoted (e.g., notas_fiscais).\n\nThe query must be a single SQL statement, ready for execution.\n\nWhat NOT to do:\n\nDo not add any text before or after the query.\n\nDo not use markdown formatting.\n\nDo not include comments or explanations.\n\nDo not use backticks or any other quotation marks for the query.\n\nDo not use table names with spaces; always use notas_fiscais.\n\nExamples:\nQuestion: What is the total number of invoices?\nAnswer: SELECT COUNT(DISTINCT \"chave_de_acesso\") FROM notas_fiscais;\n\nQuestion: How many distinct UF?\nAnswer: SELECT COUNT(DISTINCT \"uf_emitente\") FROM notas_fiscais;\n\nUser question: {{ $json.chatInput }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        -400,
+        540
+      ],
+      "id": "7df91f39-0908-4136-b4b3-d7c3c1ffc8d9",
+      "name": "Basic LLM Chain",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-001",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        760
+      ],
+      "id": "e27d6e84-3fde-4803-b6ab-c5c14cf00c3d",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NjwNVdwQxCAHEmax",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistende de SQL.\n\nVocê recebe perguntas e faz consultas no banco de dados postgresql para responder da melhor forma o usuário.\n\nAqui está a query a ser executada:{{ $json.resultado }}\n\nEssa foi a pergunta do usuário: {{ $('When chat message received').item.json.chatInput }}. \n\nMemória:\nVocê possui uma memória para consultar e responder melhor o usuário.\n\nAo fazer a consulta, responda de forma gentil o usuário.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        220,
+        540
+      ],
+      "id": "f36a0cda-64d5-4a7a-ba97-8ba50ef812b6",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        180,
+        720
+      ],
+      "id": "179f9ff0-4c7b-41cb-86b0-683d5e24170e",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NjwNVdwQxCAHEmax",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "notas_fiscais",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "chave_de_acesso",
+              "fieldValue": "={{ $json['CHAVE DE ACESSO'] }}"
+            },
+            {
+              "fieldId": "modelo",
+              "fieldValue": "={{ $json.MODELO }}"
+            },
+            {
+              "fieldId": "serie",
+              "fieldValue": "={{ $json['SÉRIE'] }}"
+            },
+            {
+              "fieldId": "numero",
+              "fieldValue": "={{ $json['NÚMERO'] }}"
+            },
+            {
+              "fieldId": "natureza_da_operacao",
+              "fieldValue": "={{ $json['NATUREZA DA OPERAÇÃO'] }}"
+            },
+            {
+              "fieldId": "data_emissao",
+              "fieldValue": "={{ $json['DATA EMISSÃO'] }}"
+            },
+            {
+              "fieldId": "evento_mais_recente",
+              "fieldValue": "={{ $json['EVENTO MAIS RECENTE'] }}"
+            },
+            {
+              "fieldId": "data_hora_evento_mais_recente",
+              "fieldValue": "={{ $json['DATA/HORA EVENTO MAIS RECENTE'] }}"
+            },
+            {
+              "fieldId": "cpf_cnpj_emitente",
+              "fieldValue": "={{ $json['CPF/CNPJ Emitente'] }}"
+            },
+            {
+              "fieldId": "razao_social_emitente",
+              "fieldValue": "={{ $json['RAZÃO SOCIAL EMITENTE'] }}"
+            },
+            {
+              "fieldId": "inscricao_estadual_emitente",
+              "fieldValue": "={{ $json['INSCRIÇÃO ESTADUAL EMITENTE'] }}"
+            },
+            {
+              "fieldId": "uf_emitente",
+              "fieldValue": "={{ $json['UF EMITENTE'] }}"
+            },
+            {
+              "fieldId": "municipio_emitente",
+              "fieldValue": "={{ $json['MUNICÍPIO EMITENTE'] }}"
+            },
+            {
+              "fieldId": "cnpj_destinatario",
+              "fieldValue": "={{ $json['CNPJ DESTINATÁRIO'] }}"
+            },
+            {
+              "fieldId": "nome_destinatario",
+              "fieldValue": "={{ $json['NOME DESTINATÁRIO'] }}"
+            },
+            {
+              "fieldId": "uf_destinatario",
+              "fieldValue": "={{ $json['UF DESTINATÁRIO'] }}"
+            },
+            {
+              "fieldId": "indicador_ie_destinatario",
+              "fieldValue": "={{ $json['INDICADOR IE DESTINATÁRIO'] }}"
+            },
+            {
+              "fieldId": "destino_da_operacao",
+              "fieldValue": "={{ $json['DESTINO DA OPERAÇÃO'] }}"
+            },
+            {
+              "fieldId": "consumidor_final",
+              "fieldValue": "={{ $json['CONSUMIDOR FINAL'] }}"
+            },
+            {
+              "fieldId": "presenca_do_comprador",
+              "fieldValue": "={{ $json['PRESENÇA DO COMPRADOR'] }}"
+            },
+            {
+              "fieldId": "valor_nota_fiscal",
+              "fieldValue": "={{ $json['VALOR NOTA FISCAL'] }}"
+            },
+            {
+              "fieldId": "numero_produto",
+              "fieldValue": "={{ $json['NÚMERO PRODUTO'] }}"
+            },
+            {
+              "fieldId": "descricao_do_produto",
+              "fieldValue": "={{ $json['DESCRIÇÃO DO PRODUTO/SERVIÇO'] }}"
+            },
+            {
+              "fieldId": "codigo_ncm_sh",
+              "fieldValue": "={{ $json['CÓDIGO NCM/SH'] }}"
+            },
+            {
+              "fieldId": "ncm_sh_tipo_de_produto",
+              "fieldValue": "={{ $json['NCM/SH (TIPO DE PRODUTO)'] }}"
+            },
+            {
+              "fieldId": "cfop",
+              "fieldValue": "={{ $json.CFOP }}"
+            },
+            {
+              "fieldId": "quantidade",
+              "fieldValue": "={{ $json.QUANTIDADE }}"
+            },
+            {
+              "fieldId": "unidade",
+              "fieldValue": "={{ $json.UNIDADE }}"
+            },
+            {
+              "fieldId": "valor_unitario",
+              "fieldValue": "={{ $json['VALOR UNITÁRIO'] }}"
+            },
+            {
+              "fieldId": "valor_total",
+              "fieldValue": "={{ $json['VALOR TOTAL'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        520,
+        120
+      ],
+      "id": "81507c81-e9ba-4f41-9cba-7bef88ab7780",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KG1SXV3h4Nwm8CPd",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.resultado }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        500,
+        720
+      ],
+      "id": "bf329034-bf32-4545-b94c-98255e792f2f",
+      "name": "Execute a SQL query in Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "PGuxy2DQqn9lWDOe",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let texto = $input.first().json.text;\n// Remova os backticks e \"sql\"\ntexto = texto.replace(/```/g, \"\").replace(/sql/g, \"\");\nreturn [{ resultado: texto }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        540
+      ],
+      "id": "a56982f1-b55d-415c-957c-3617785ee729",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1WSSDtezq2jf-Bi4OenJwYbhITSutFALD",
+          "mode": "list",
+          "cachedResultName": "202401_NFs.zip",
+          "cachedResultUrl": "https://drive.google.com/file/d/1WSSDtezq2jf-Bi4OenJwYbhITSutFALD/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -460,
+        120
+      ],
+      "id": "a65aebe2-4179-42d5-90cf-c4e3f9a6c538",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "rcN3sltktkI92b9p",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "['CHAVE DE ACESSO']",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        280,
+        120
+      ],
+      "id": "c297b7b6-74dd-43ed-ac61-bddec3e8b81f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        340,
+        740
+      ],
+      "id": "7cc7570b-bfe9-456c-9e65-e67be04e0f88",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query in Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b0113a4-1e1f-4c85-9dc3-1587214cbc36",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "669a68e7819b8e33299f634e2e5201eac82eb350b2c97fe50fe1fddab7eb6194"
+  },
+  "id": "1vTsK7MnLqlHpmiS",
+  "tags": []
+}
