@@ -1,7 +1,7 @@
 # I2A2
 Repositório criado para o curso do I2A2
 
-#### Desafioa 24_06
+#### Desafio 24_06
 1. Framework escolhida
 Para a implementação desta solução, utilizamos o N8N como framework principal. O N8N
 permite a criação de fluxos automatizados com integração entre múltiplas ferramentas e
